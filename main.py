@@ -5,7 +5,7 @@ import time
 from langchain_openai import OpenAI
 from langchain_classic.chains import RetrievalQAWithSourcesChain
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import UnstructuredURLLoader
+from langchain_community.document_loaders import WebBaseLoader
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
@@ -48,15 +48,12 @@ if process_url_clicked:
 
     main_placeholder.text("Data Loading...Started...")
 
-    try:
-        loader = UnstructuredURLLoader(
-            urls=urls,
-            headers={"User-Agent": "Mozilla/5.0"}
-        )
-        data = loader.load()
-    except Exception as e:
-        st.error(f"Error loading URLs: {str(e)}")
-        st.stop()
+   try:
+    loader = WebBaseLoader(web_paths=urls)
+    data = loader.load()
+except Exception as e:
+    st.error(f"Error loading URLs: {str(e)}")
+    st.stop()
 
     # ======================
     # VALIDATION
