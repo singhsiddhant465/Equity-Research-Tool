@@ -46,14 +46,14 @@ if process_url_clicked:
         st.error("Please enter at least one valid URL")
         st.stop()
 
-    main_placeholder.text("Data Loading...Started...")
+        main_placeholder.text("Data Loading...Started...")
 
-   try:
-    loader = WebBaseLoader(web_paths=urls)
-    data = loader.load()
-except Exception as e:
-    st.error(f"Error loading URLs: {str(e)}")
-    st.stop()
+    try:
+        loader = WebBaseLoader(web_paths=urls)
+        data = loader.load()
+    except Exception as e:
+        st.error(f"Error loading URLs: {str(e)}")
+        st.stop()
 
     # ======================
     # VALIDATION
