@@ -42,32 +42,19 @@ llm = OpenAI(temperature=0.9, max_tokens=500)
 
 if process_url_clicked:
 
-    inputs = [u.strip() for u in urls if u.strip()]
-
-    if not inputs:
-        st.error("Please enter some text, numbers, or a URL.")
+    urls = [u.strip() for u in urls if u.strip()]
+    if not urls:
+        st.error("Please enter at least one valid URL")
         st.stop()
 
-    main_placeholder.text("Data Loading...Started...")
+        main_placeholder.text("Data Loading...Started...")
 
-    from langchain_core.documents import Document
-
-    data = []
-
-    for item in inputs:
-        if item.startswith(("http://", "https://")):
-            try:
-                loader = WebBaseLoader(web_paths=[item])
-                data.extend(loader.load())
-            except Exception as e:
-                st.warning(f"Could not load URL {item}: {str(e)}")
-        else:
-            data.append(
-                Document(
-                    page_content=item,
-                    metadata={"source": "Manual Input"}
-                )
-            )
+    try:
+        loader = WebBaseLoader(web_paths=urls)
+        data = loader.load()
+    except Exception as e:
+        st.error(f"Error loading URLs: {str(e)}")
+        st.stop()
 
     if not data:
         st.error("No content could be loaded.")
