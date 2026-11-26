@@ -2,7 +2,7 @@ import os
 import streamlit as st
 import time
 
-from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
 from langchain_classic.chains import RetrievalQAWithSourcesChain
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import WebBaseLoader
@@ -32,9 +32,15 @@ faiss_store_path = "faiss_store_openai"
 main_placeholder = st.empty()
 
 # ======================
-# LLM
+# MODELS
 # ======================
-llm = OpenAI(temperature=0.9, max_tokens=500)
+# gpt-3.5-turbo-instruct was retired by OpenAI, so use a chat model.
+# Override with OPENAI_MODEL in .env / Streamlit secrets without touching code.
+LLM_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+EMBED_MODEL = os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-small")
+
+# temperature=0 keeps answers grounded in the retrieved articles
+llm = ChatOpenAI(model=LLM_MODEL, temperature=0, max_tokens=500)
 
 # ======================
 # PROCESS URLS
@@ -47,7 +53,7 @@ if process_url_clicked:
         st.error("Please enter at least one valid URL")
         st.stop()
 
-        main_placeholder.text("Data Loading...Started...")
+    main_placeholder.text("Data Loading...Started...")
 
     try:
         loader = WebBaseLoader(web_paths=urls)
@@ -98,7 +104,7 @@ if process_url_clicked:
     main_placeholder.text("Embedding Vector Building...")
 
     try:
-        embeddings = OpenAIEmbeddings()
+        embeddings = OpenAIEmbeddings(model=EMBED_MODEL)
         vectorstore_openai = FAISS.from_documents(docs, embeddings)
     except Exception as e:
         st.error(f"Embedding/FAISS error: {str(e)}")
@@ -121,7 +127,7 @@ if query:
         st.stop()
 
     try:
-        embeddings = OpenAIEmbeddings()
+        embeddings = OpenAIEmbeddings(model=EMBED_MODEL)
         vectorstore = FAISS.load_local(
             faiss_store_path,
             embeddings,
@@ -138,7 +144,7 @@ if query:
 
     with st.spinner("Generating answer..."):
         try:
-            result = chain({"question": query}, return_only_outputs=True)
+            result = chain.invoke({"question": query})
         except Exception as e:
             st.error(f"Model error: {str(e)}")
             st.stop()
