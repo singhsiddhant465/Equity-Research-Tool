@@ -27,6 +27,7 @@ st.sidebar.title("News Article URLs")
 
 urls = [st.sidebar.text_input(f"URL {i+1}") for i in range(3)]
 process_url_clicked = st.sidebar.button("Process URLs")
+show_debug = st.sidebar.checkbox("Show debug info", value=False)
 
 faiss_store_path = "faiss_store_openai"
 main_placeholder = st.empty()
@@ -73,13 +74,17 @@ if process_url_clicked:
 
     # Show what was actually scraped, and flag pages that are blocks, not articles
     BLOCK_MARKERS = ["access denied", "captcha", "enable javascript", "are you a robot", "forbidden"]
-    with st.expander("Loaded content preview (debug)"):
+    for d in data:
+        text = " ".join(d.page_content.split())
+        if len(text) < 1000 or any(m in text.lower() for m in BLOCK_MARKERS):
+            st.warning(f"{d.metadata.get('source')} looks blocked or empty, not a full article.")
+
+    if show_debug:
+      with st.expander("Loaded content preview (debug)"):
         for d in data:
             text = " ".join(d.page_content.split())
             st.write(f"**{d.metadata.get('source')}** \u2014 {len(text):,} characters")
             st.caption(text[:400] + ("..." if len(text) > 400 else ""))
-            if len(text) < 1000 or any(m in text.lower() for m in BLOCK_MARKERS):
-                st.warning("This page looks blocked or empty, not a full article.")
 
     if not data:
         st.error("No content could be loaded.")
@@ -157,7 +162,8 @@ if query:
         st.stop()
 
     # Show which chunks retrieval picked (lower score = closer match for FAISS L2)
-    with st.expander("Retrieved chunks (debug)"):
+    if show_debug:
+      with st.expander("Retrieved chunks (debug)"):
         for doc, score in vectorstore.similarity_search_with_score(query, k=4):
             st.write(f"**{doc.metadata.get('source')}** \u2014 distance {score:.3f}")
             st.caption(" ".join(doc.page_content.split())[:400])
