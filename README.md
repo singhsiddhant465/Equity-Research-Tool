@@ -57,10 +57,16 @@ streamlit run main.py
 - The FAISS index will be saved in a local file path in pickle format for future use.
 - One can now ask a question and get the answer based on these news articles
 
-  - https://indianexpress.com/article/business/rupee-record-low-cea-alarm-further-fall-imperative-v-anantha-nageswaran-10686113/
-  - https://indianexpress.com/article/business/as-rupee-stares-at-100-to-a-policymakers-engage-with-a-lesson-from-just-three-years-ago-10694773/
-  - https://indianexpress.com/article/business/nantha-nageswaran-rupee-all-time-low-balance-of-payments-fy27-10685685/
+- https://rbi.org.in/scriptS/BS_PressReleaseDisplay.aspx?prid=63742
+- https://scroll.in/latest/1092967/rupee-slumps-to-all-time-low-of-96-8-against-us-dollar
+- https://www.deccanherald.com/business/rupee-falls-to-record-low-of-9647-against-us-dollar-in-intraday-trade-4008359
 
+- - One can now ask a question and get the answer based on these news articles, for example:
+  - "What did the RBI do to the repo rate in October 2026?"
+  - "Why did the rupee fall to a record low?"
+  - "What Balance of Payments deficit do HSBC economists expect for FY27?"
+
+Example URLs (tested to load on Streamlit Cloud):
 ## Project Structure
 
 - main.py: The main Streamlit application script.
