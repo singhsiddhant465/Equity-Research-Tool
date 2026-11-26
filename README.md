@@ -2,77 +2,86 @@
 
 # EquityBot :- News Research Tool
 
-EquityBot is a user-friendly news research tool designed for effortless information retrieval. Users can input article URLs and ask questions to receive relevant insights from the stock market and financial domain.
+EquityBot is a news research tool for fast, grounded information retrieval. Users paste financial-news article URLs and ask questions; the app answers only from those articles and cites the source URLs.
 
-
+**Live app:** https://equity-research-tool-465.streamlit.app
 
 ## Features
 
-- Load URLs or upload text files containing URLs to fetch article content.
-- Process article content through LangChain's UnstructuredURL Loader
-- Construct an embedding vector using OpenAI's embeddings and leverage FAISS, a powerful similarity search library, to enable swift and effective retrieval of relevant information
-- Interact with the LLM's (Chatgpt) by inputting queries and receiving answers along with source URLs.
-
+- Load up to 3 news-article URLs and scrape them with LangChain's `WebBaseLoader` (browser-like headers, fails loudly on HTTP errors).
+- Flags pages that look blocked or empty instead of silently indexing an error page.
+- Split text with `RecursiveCharacterTextSplitter` (chunk size 1000, overlap 200).
+- Embed chunks with OpenAI embeddings (`text-embedding-3-small`) and index them in FAISS for fast similarity search.
+- Answer questions with an OpenAI chat model (`gpt-4o-mini` by default, temperature 0) through a retrieval QA chain that returns source URLs, and says "I don't know" when the articles don't contain the answer.
+- Optional "Show debug info" view: scraped-text preview and the retrieved chunks with their similarity distances.
 
 ## Installation
 
-1.Clone this repository to your local machine using:
+1. Clone this repository:
 
 ```bash
-  git clone https://github.com/codebasics/langchain.git
+git clone https://github.com/singhsiddhant465/Equity-Research-Tool.git
+cd Equity-Research-Tool
 ```
-2.Navigate to the project directory:
+
+2. Create and activate a virtual environment:
 
 ```bash
-  cd 2_news_research_tool_project
+python -m venv venv
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # macOS / Linux
 ```
-3. Install the required dependencies using pip:
+
+3. Install the dependencies:
 
 ```bash
-  pip install -r requirements.txt
+pip install -r requirements.txt
 ```
-4.Set up your OpenAI API key by creating a .env file in the project root and adding your API
+
+4. Create a `.env` file in the project root with your OpenAI API key:
 
 ```bash
-  OPENAI_API_KEY=your_api_key_here
+OPENAI_API_KEY=your_api_key_here
+# optional overrides
+# OPENAI_MODEL=gpt-4o-mini
+# OPENAI_EMBED_MODEL=text-embedding-3-small
 ```
-## Usage/Examples
 
-1. Run the Streamlit app by executing:
+## Usage
+
+1. Run the Streamlit app:
+
 ```bash
 streamlit run main.py
-
 ```
 
-2.The web app will open in your browser.
+2. The app opens at http://localhost:8501.
 
-- On the sidebar, you can input URLs directly.
+- Paste up to 3 article URLs in the sidebar and click **Process URLs**.
+- The app scrapes the pages, splits the text into chunks, embeds them and saves a FAISS index locally.
+- Ask a question. The answer is generated only from the retrieved chunks, with source URLs.
 
-- Initiate the data loading and processing by clicking "Process URLs."
-
-- Observe the system as it performs text splitting, generates embedding vectors, and efficiently indexes them using FAISS.
-
-- The embeddings will be stored and indexed using FAISS, enhancing retrieval speed.
-
-- The FAISS index will be saved in a local file path in pickle format for future use.
-- One can now ask a question and get the answer based on these news articles
+### Example URLs
 
 - https://rbi.org.in/scriptS/BS_PressReleaseDisplay.aspx?prid=63742
 - https://scroll.in/latest/1092967/rupee-slumps-to-all-time-low-of-96-8-against-us-dollar
 - https://www.deccanherald.com/business/rupee-falls-to-record-low-of-9647-against-us-dollar-in-intraday-trade-4008359
 
-- - One can now ask a question and get the answer based on these news articles, for example:
-  - "What did the RBI do to the repo rate in October 2026?"
-  - "Why did the rupee fall to a record low?"
-  - "What Balance of Payments deficit do HSBC economists expect for FY27?"
+### Example questions
 
-Example URLs (tested to load on Streamlit Cloud):
+- What did the RBI do to the repo rate in October 2026?
+- Why did the rupee fall to a record low?
+- What Balance of Payments deficit do HSBC economists expect for FY27?
+
+Note: some news sites block requests from cloud servers. The app shows a warning when a page looks blocked.
+
 ## Project Structure
 
-- main.py: The main Streamlit application script.
-- requirements.txt: A list of required Python packages for the project.
-- faiss_store_openai.pkl: A pickle file to store the FAISS index.
-- .env: Configuration file for storing your OpenAI API key.
+- `main.py`: the Streamlit application.
+- `requirements.txt`: Python dependencies.
+- `faiss_store_openai/`: the saved FAISS index (`index.faiss` + `index.pkl`), created when you process URLs.
+- `.env`: your OpenAI API key (not committed).
+- `text_loaders_splitters.ipynb`: notebook exploring loaders and text splitters.
 
 ## Author
 
